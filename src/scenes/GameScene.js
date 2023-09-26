@@ -132,8 +132,11 @@ export class GameScene extends PIXI.Container {
         playButtonSprite.anchor.set(0.5)
         playButtonSprite.x = UiControl.width / 2
         playButtonSprite.y = UiControl.height / 2
-        playButtonSprite.interactive = true;
+        playButtonSprite.interactive = true
         playButtonSprite.on('tap', (event) => {
+            this.handlePlayButton()
+        })
+        playButtonSprite.on('mousedown', (event) => {
             this.handlePlayButton()
         })
 
