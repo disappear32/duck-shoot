@@ -1,4 +1,5 @@
 import { Manager } from "../Manager.js"
+import Aim from "../game-objects/Aim.js"
 import Duck from "../game-objects/Duck.js"
 import Gun from "../game-objects/Gun.js"
 
@@ -52,9 +53,23 @@ export class GameScene extends PIXI.Container {
 
 
 
+        //Текст при выигрыше
+        this.winText = new PIXI.Text('', {
+            fontSize: 96,
+            fill: 0x3E3E3E,
+            align: 'center',
+        })
+        this.winText.name = 'Text'
+        this.winText.x = gameBoard.width / 2
+        this.winText.y = 100
+        this.winText.visible = false
+        gameBoardContainer.addChild(this.winText)
+
+
+
         //Спрайты уточек
         const duckCount = 2
-        const duckSize = { 
+        const duckSize = {
             width: 120,
             height: 240
         }
@@ -63,10 +78,10 @@ export class GameScene extends PIXI.Container {
         for (let i = 0; i < duckCount; i++) {
             const duckMargin = (gameBoard.width - duckSize.width * (duckCount - 1)) / duckCount
             const duck = new Duck(
-                this, 
-                duckMargin * i + duckSize.width * (i - 1), 
-                gameBoard.height - duckSize.height, 
-                duckSize.width, 
+                this,
+                duckMargin * i + duckSize.width * (i - 1),
+                gameBoard.height - duckSize.height,
+                duckSize.width,
                 duckSize.height
             )
 
@@ -102,20 +117,31 @@ export class GameScene extends PIXI.Container {
         playButtonSprite.interactive = true;
         playButtonSprite.on('tap', (event) => {
             this.handlePlayButton()
-            this.gun.gunAnimationStart()
         })
-        
+
         UiContainer.addChild(playButtonSprite)
-        
+
+
+
+        //Прицел
+        this.aim = new Aim(this, 0, 0, 1080, 1480)
+        this.addChild(this.aim)
+
+
+
+
+        //Настройка для движения уточек и ружья
         this.isMoveContinue = true
     }
 
     update(framesPassed) {
+        TWEEN.update()
+
         const duckVelocity = this.isMoveContinue ? 5 : 0
 
         this.ducks.forEach((duck) => {
-            if (duck.x >= 980) { 
-                duck.x = -duck.width 
+            if (duck.x >= 980) {
+                duck.x = -duck.width
                 duck.hideBulletHole()
             }
 
@@ -157,24 +183,78 @@ export class GameScene extends PIXI.Container {
         })
 
         if (isHitDuck) {
-            this.isMoveContinue = false
-            this.scaleCamera()
+            const holePosition = this.getHolePosition(gunBorders, shotDuckIndex)
 
-            setTimeout(() => {
-                this.ducks[shotDuckIndex].shootDuck(gunBorders)
+            this.ducks[shotDuckIndex].setHolePosition(holePosition.local)
+            this.isMoveContinue = false
+            Manager.scaleCamera()
+
+            this.aim.showAim(holePosition.global).then(() => {
+                this.gun.gunAnimationStart()
+
+                this.ducks[shotDuckIndex].shootDuck()
+
+                this.aim.hideAim()
+
+                this.showWinText()
+
                 this.isMoveContinue = true
-                this.returnCamera()
-            }, 1000)
+
+                Manager.returnCamera()
+            })
+        }
+        else {
+            this.gun.gunAnimationStart()
         }
     }
 
-    scaleCamera() {
-        this.scale.x = 1.3
-        this.scale.y = 1.3
+    getHolePosition(globalGunPos, shotDuckIndex) {
+        const globalLeft = {
+            x: globalGunPos.leftX,
+            y: 0
+        }
+        const globalRight = {
+            x: globalGunPos.rightX,
+            y: 0
+        }
+        const localLeft = this.ducks[shotDuckIndex].toLocal(globalLeft)
+        const localRight = this.ducks[shotDuckIndex].toLocal(globalRight)
+
+        const localHolePos = {
+            x: Math.random() * (localRight.x - localLeft.x) + localLeft.x,
+            y: Math.random() * this.ducks[shotDuckIndex].height
+        }
+        const globalHolePos = this.ducks[shotDuckIndex].toGlobal(localHolePos)
+
+
+        return {
+            local: localHolePos,
+            global: globalHolePos
+        }
     }
 
-    returnCamera() {
-        this.scale.x = 1
-        this.scale.y = 1
+    showWinText() {
+        console.log('text start')
+        this.winText.visible = true
+        this.winText.y = 100
+        this.winText.scale = 0.7
+        this.winText.alpha = 0.3
+
+        const randomValue = Math.random() * 100 + 10
+
+        const textAnim = new TWEEN.Tween([{ y: 100 }, { scale: 0.3 }, { alpha: 0.7 }, { value: 0 }])
+            .to([{ y: 20 }, { scale: 1.5 }, { alpha: 1 }, { value: randomValue }], 700)
+            //.repeat(1)
+            //.delay(300)
+            .onUpdate(() => {
+                this.winText.y = y
+                this.winText.scale = scale
+                this.winText.alpha = alpha
+                this.winText.text = `${value} RUB`
+            })
+            .onComplete(() => {
+                this.winText.visible = false
+                console.log('text done')
+            })
     }
 }

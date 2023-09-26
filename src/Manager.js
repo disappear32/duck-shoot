@@ -60,21 +60,20 @@ export class Manager {
         const enlargedWidth = Math.floor(scale * Manager.width)
         const enlargedHeight = Math.floor(scale * Manager.height)
 
-        const horizontalMargin = (screenWidth - enlargedWidth) / 2
-        const verticalMargin = (screenHeight - enlargedHeight) / 2
-
         Manager.app.view.style.width = `${enlargedWidth}px`
         Manager.app.view.style.height = `${enlargedHeight}px`
-        Manager.app.view.style.marginLeft = Manager.app.view.style.marginRight = `${horizontalMargin}px`
-        Manager.app.view.style.marginTop = Manager.app.view.style.marginBottom = `${verticalMargin}px`
-
-        console.log(Manager.app.view.style.width)
-        console.log(Manager.width)
-        const width = Manager.app.view.style.getPropertyValue("width")
-        console.log(width)
     }
 
     static scaleCamera() {
-        const width = Manager.app.view.style.setProperty("width", "100px")
+        const currWidth = parseInt(Manager.app.view.style.getPropertyValue("width").slice(0, -2), 10)
+        const canvasScaleFactor = Manager.width / currWidth
+        const screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+
+        const scaleFactor = screenWidth / (currWidth - 40 * canvasScaleFactor)
+        Manager.app.view.style.transform = `scale(${scaleFactor})`
+    }
+
+    static returnCamera() {
+        Manager.app.view.style.transform = ''
     }
 }

@@ -4,6 +4,7 @@
     <title>Shot Game</title>
 
     <script src="lib/pixi.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/20.0.3/tween.umd.js"></script>
 
     <style>
       html,
@@ -13,12 +14,17 @@
         height: 100%;
         overflow: hidden;
       }
+
+      #game {
+        transition: all 0.8s ease;
+        will-change: transform;
+      }
     </style>
   </head>
   <body>
     <script type="module" src="src/main.js"></script>
     
-    <div>
+    <div style="display: flex; justify-content: center; align-items: center;">
       <canvas id="game"></canvas>
     </div>
   </body>

@@ -31,6 +31,13 @@ const manifest = {
             {
                 "explosions_map": "./resources/explosions.json",
             }
+        },
+        {
+            name: "Aim Bundle",
+            assets:
+            {
+                "aim": "./resources/aim.png",
+            }
         }
     ]
 }

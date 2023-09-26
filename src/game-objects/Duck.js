@@ -3,6 +3,7 @@ import { Manager } from "../Manager.js"
 export default class Duck extends PIXI.Container {
     width
     height
+    hole
 
     constructor(scene, x, y, width, height) {
         super()
@@ -22,32 +23,21 @@ export default class Duck extends PIXI.Container {
         billetHoleSprite.visible = false
         this.addChild(billetHoleSprite)
 
-        this.holeMarin = Math.max(billetHoleSprite.width, billetHoleSprite.height)
+        this.hole = this.children[1]
+
+        console.log(this.position)
     }
 
-    shootDuck(globalGunPos) {
-        const globalLeft = {
-            x: globalGunPos.leftX,
-            y: 0
-        }
-        const globalRight = {
-            x: globalGunPos.rightX,
-            y: 0
-        }
-        const localLeft = this.toLocal(globalLeft)
-        const localRight = this.toLocal(globalRight)
-        console.log(globalLeft, localLeft)
-        console.log(globalRight, localRight)
+    setHolePosition(localHolePos) {
+        this.hole.x = localHolePos.x
+        this.hole.y = localHolePos.y
+    }
 
-        const randomHolePosX = Math.random() * (localRight.x - localLeft.x) + localLeft.x
-        const randomHolePosY = Math.random() * this.height
-
-        this.children[1].x = randomHolePosX
-        this.children[1].y = randomHolePosY
-        this.children[1].visible = true
+    shootDuck() {
+        this.hole.visible = true
     }
 
     hideBulletHole() {
-        this.children[1].visible = false
+        this.hole.visible = false
     }
 }
