@@ -1,3 +1,5 @@
+import { Manager } from "../Manager.js"
+
 export default class Aim extends PIXI.Container {
     constructor(scene, x, y, width, height) {
         super(scene, x, y)
@@ -7,26 +9,15 @@ export default class Aim extends PIXI.Container {
         this.height = height
         this.visible = false
 
-        // const aimBackground = new PIXI.Graphics()
-        // aimBackground.beginFill(0x717171)
-        // aimBackground.drawRect(0, 0, width, height)
-        // aimBackground.endFill()
-        // this.addChild(aimBackground)
-
         const aimSprite = PIXI.Sprite.from('aim')
         aimSprite.anchor.set(0.5)
         this.addChild(aimSprite)
-
-        this.aimWidth = aimSprite.width
-        this.aimHeight = aimSprite.height
-        this.aimX = aimSprite.x
-        this.aimY = aimSprite.y
     }
 
     async showAim(holePosition) {
         const aimPos = {
-            x: Math.random() * (this.width - this.aimWidth / 2),
-            y: Math.random() * (this.height - this.aimHeight / 2)
+            x: Math.random() * (Manager.width - this.width / 2),
+            y: 1480 + this.height / 2
         }
 
         this.x = aimPos.x

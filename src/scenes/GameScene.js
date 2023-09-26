@@ -10,6 +10,17 @@ export class GameScene extends PIXI.Container {
     constructor() {
         super()
 
+        //Бэк
+        // const background = PIXI.Sprite.from('background')
+        // background.anchor.set(0.5)
+        // background.x = Manager.width / 2
+        // background.y = Manager.height / 2
+        // background.width = Manager.width
+        // background.height = Manager.height
+        // this.addChild(background)
+
+
+
         //Ружье
         this.gun = new Gun(this, 453, 1183)
 
@@ -55,11 +66,12 @@ export class GameScene extends PIXI.Container {
 
         //Текст при выигрыше
         this.winText = new PIXI.Text('', {
-            fontSize: 96,
+            fontSize: 72,
             fill: 0x3E3E3E,
-            align: 'center',
+            align: 'center'
         })
         this.winText.name = 'Text'
+        this.winText.anchor.set(0.5)
         this.winText.x = gameBoard.width / 2
         this.winText.y = 100
         this.winText.visible = false
@@ -88,6 +100,12 @@ export class GameScene extends PIXI.Container {
             gameBoardContainer.addChild(duck)
             this.ducks.push(duck)
         }
+
+
+
+        //Прицел
+        this.aim = new Aim(this, 0, 0, 1080, 1480)
+        this.addChild(this.aim)
 
 
 
@@ -123,12 +141,6 @@ export class GameScene extends PIXI.Container {
 
 
 
-        //Прицел
-        this.aim = new Aim(this, 0, 0, 1080, 1480)
-        this.addChild(this.aim)
-
-
-
 
         //Настройка для движения уточек и ружья
         this.isMoveContinue = true
@@ -142,7 +154,7 @@ export class GameScene extends PIXI.Container {
         this.ducks.forEach((duck) => {
             if (duck.x >= 980) {
                 duck.x = -duck.width
-                duck.hideBulletHole()
+                duck.resetDuck()
             }
 
             duck.x += duckVelocity * framesPassed
@@ -160,8 +172,8 @@ export class GameScene extends PIXI.Container {
 
         const isHitDuck = this.ducks.some((duck) => {
             const duckBordres = {
-                leftX: duck.getGlobalPosition().x,
-                rightX: duck.getGlobalPosition().x + duck.width
+                leftX: duck.getGlobalPosition().x + duck.holeMargin,
+                rightX: duck.getGlobalPosition().x + duck.width - duck.holeMargin
             }
 
             if (duckBordres.leftX <= gunBorders.leftX && gunBorders.rightX <= duckBordres.rightX) {
@@ -205,6 +217,13 @@ export class GameScene extends PIXI.Container {
         }
         else {
             this.gun.gunAnimationStart()
+
+            this.winText.visible = true
+            this.winText.text = 'Промах!'
+
+            setTimeout(() => {
+                this.winText.visible = false
+            }, 900)
         }
     }
 
@@ -234,27 +253,32 @@ export class GameScene extends PIXI.Container {
     }
 
     showWinText() {
-        console.log('text start')
         this.winText.visible = true
-        this.winText.y = 100
-        this.winText.scale = 0.7
-        this.winText.alpha = 0.3
 
-        const randomValue = Math.random() * 100 + 10
-
-        const textAnim = new TWEEN.Tween([{ y: 100 }, { scale: 0.3 }, { alpha: 0.7 }, { value: 0 }])
-            .to([{ y: 20 }, { scale: 1.5 }, { alpha: 1 }, { value: randomValue }], 700)
-            //.repeat(1)
-            //.delay(300)
+        const scalingFrom = { scale: 0.7 } 
+        const scalingTo = { scale: 1.3 } 
+        const scalingAnim = new TWEEN.Tween(scalingFrom)
+            .to(scalingTo, 1200)
+            .easing(TWEEN.Easing.Bounce.Out)
             .onUpdate(() => {
-                this.winText.y = y
-                this.winText.scale = scale
-                this.winText.alpha = alpha
-                this.winText.text = `${value} RUB`
+                this.winText.scale.set(scalingFrom.scale, scalingFrom.scale)
             })
             .onComplete(() => {
                 this.winText.visible = false
-                console.log('text done')
             })
+            .start()
+
+
+        const appearFrom = { y: 160, alpha: 0.6, value: 0 }
+        const appearTo = { y: 70, alpha: 1, value: Math.random() * 30 }
+        const appearAnim = new TWEEN.Tween(appearFrom)
+            .to(appearTo, 800)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .onUpdate(() => {
+                this.winText.y = appearFrom.y
+                this.winText.alpha = appearFrom.alpha
+                this.winText.text = `x${appearFrom.value.toFixed(1)}`
+            })
+            .start()
     }
 }
